@@ -34,7 +34,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-blue-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-blue-700 mb-6 text-center">
-          MC SimLab Inventory
+          MC Nursing Skills Lab Inventory
         </h1>
 
         {errorMsg && (

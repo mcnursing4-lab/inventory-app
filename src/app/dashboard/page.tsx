@@ -45,7 +45,7 @@ function DashboardPageContent() {
 
       {/* Welcome Section */}
       <h1 className="text-3xl font-bold text-blue-800 text-center font-sans">
-        Welcome to MC SimLab Inventory
+        Welcome to MC Nursing Skills Lab Inventory
       </h1>
       <p className="text-gray-600">
         Use the buttons below to quickly navigate to different sections.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -9,6 +9,29 @@ export default function SetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
+
+  // 🧩 Capture the Supabase session from the URL hash fragment
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes("access_token")) {
+      const params = new URLSearchParams(hash.substring(1)); // remove the '#'
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (access_token && refresh_token) {
+        // Initialize session manually
+        supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        }).then(({ error }) => {
+          if (error) {
+            console.error("Failed to set session:", error.message);
+            setErrorMsg("Failed to initialize session. Please retry the link.");
+          }
+        });
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +45,6 @@ export default function SetPasswordPage() {
     setLoading(true);
 
     try {
-      // ✅ Update the invited user's password (session is already active via /auth/callback)
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
@@ -31,7 +53,7 @@ export default function SetPasswordPage() {
         return;
       }
 
-      // ✅ Redirect to dashboard after success
+      // ✅ Redirect after successful password update
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Unexpected error:", err);

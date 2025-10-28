@@ -52,7 +52,7 @@ export default function DashboardLayout({
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-60 bg-blue-100 p-8 border-r flex flex-col">
-          <h2 className="text-xl font-bold mb-6">MC SimLab Inventory</h2>
+          <h2 className="text-xl font-bold mb-6">MC Nursing Skills Lab Inventory</h2>
           <nav className="flex flex-col gap-1 flex-grow">
             <Link href="/dashboard" className="px-3 py-2 rounded hover:bg-blue-200">
               Dashboard
