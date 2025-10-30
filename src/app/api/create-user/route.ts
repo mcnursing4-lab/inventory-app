@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     console.log("Inviting:", email, "as role:", role);
 
     // ✅ Use environment-based redirect URL (falls back to localhost in dev)
-    const baseUrl = process.env.SUPABASE_SITE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const redirectTo = `${baseUrl}/set-password`;
 
     // 🪄 Debug log to confirm what Supabase will actually use
