@@ -31,7 +31,10 @@ export default function LocationsPage() {
 
     if (error) {
       console.error("❌ Error fetching locations:", error.message);
-      setMessage({ text: "❌ Error fetching locations: " + error.message, type: "error" });
+      setMessage({
+        text: "❌ Error fetching locations: " + error.message,
+        type: "error",
+      });
     } else {
       setLocations(data || []);
     }
@@ -46,14 +49,18 @@ export default function LocationsPage() {
         {
           name: newLocation,
           organization_id:
-            process.env.NEXT_PUBLIC_DEFAULT_ORG_ID || "00000000-0000-0000-0000-000000000001",
+            process.env.NEXT_PUBLIC_DEFAULT_ORG_ID ||
+            "00000000-0000-0000-0000-000000000001",
         },
       ])
       .select("*");
 
     if (error) {
       console.error("❌ Supabase insert error:", error.message);
-      setMessage({ text: "❌ Error adding location: " + error.message, type: "error" });
+      setMessage({
+        text: "❌ Error adding location: " + error.message,
+        type: "error",
+      });
     } else {
       setLocations((prev) => [...(data || []), ...prev]);
       setNewLocation("");
@@ -64,15 +71,50 @@ export default function LocationsPage() {
   const deleteLocation = async (id: string) => {
     if (!confirm("Are you sure you want to delete this location?")) return;
 
-    const { error } = await supabase.from("locations").delete().eq("id", id);
+    // Try to delete and get the deleted rows back
+    const { data, error } = await supabase
+      .from("locations")
+      .delete({ returning: "representation" })
+      .eq("id", id)
+      .select("*");
 
     if (error) {
       console.error("❌ Error deleting location:", error.message);
-      setMessage({ text: "❌ Error deleting location: " + error.message, type: "error" });
-    } else {
-      setLocations((prev) => prev.filter((loc) => loc.id !== id));
-      setMessage({ text: "✅ Location deleted successfully!", type: "success" });
+
+      // Handle permission denied or RLS errors explicitly
+      if (
+        error.message.includes("permission denied") ||
+        error.message.includes("policy") ||
+        error.message.includes("violates")
+      ) {
+        setMessage({
+          text: "🚫 Delete not allowed for this user.",
+          type: "error",
+        });
+      } else {
+        setMessage({
+          text: "❌ Error deleting location: " + error.message,
+          type: "error",
+        });
+      }
+      return;
     }
+
+    // If RLS silently prevented the delete, 'data' will be empty
+    if (!data || data.length === 0) {
+      setMessage({
+        text: "🚫 Delete not allowed for this user.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Success path
+    setLocations((prev) => prev.filter((loc) => loc.id !== id));
+    setMessage({
+      text: "✅ Location deleted successfully!",
+      type: "success",
+    });
   };
 
   return (
@@ -83,7 +125,9 @@ export default function LocationsPage() {
       {message && (
         <div
           className={`mb-4 p-2 rounded ${
-            message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            message.type === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
           }`}
         >
           {message.text}
@@ -122,7 +166,7 @@ export default function LocationsPage() {
               <span>{loc.name}</span>
               <button
                 onClick={() => deleteLocation(loc.id)}
-                className="px-2 py-1 bg-blue-100 text-red rounded hover:bg-grey-600"
+                className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
               >
                 X
               </button>
