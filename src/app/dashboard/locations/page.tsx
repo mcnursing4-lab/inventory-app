@@ -61,60 +61,58 @@ export default function LocationsPage() {
         text: "❌ Error adding location: " + error.message,
         type: "error",
       });
-    } else {
+    } else if (data && data.length > 0) {
       setLocations((prev) => [...(data || []), ...prev]);
       setNewLocation("");
       setMessage({ text: "✅ Location added successfully!", type: "success" });
+    } else {
+      setMessage({ text: "🚫 Add not allowed for this user.", type: "error" });
     }
   };
 
   const deleteLocation = async (id: string) => {
     if (!confirm("Are you sure you want to delete this location?")) return;
 
-    // Try to delete and get the deleted rows back
-    const { data, error } = await supabase
-      .from("locations")
-      .delete({ returning: "representation" })
-      .eq("id", id)
-      .select("*");
+    const { error } = await supabase.from("locations").delete().eq("id", id);
 
     if (error) {
       console.error("❌ Error deleting location:", error.message);
-
-      // Handle permission denied or RLS errors explicitly
-      if (
-        error.message.includes("permission denied") ||
-        error.message.includes("policy") ||
-        error.message.includes("violates")
-      ) {
-        setMessage({
-          text: "🚫 Delete not allowed for this user.",
-          type: "error",
-        });
-      } else {
-        setMessage({
-          text: "❌ Error deleting location: " + error.message,
-          type: "error",
-        });
-      }
-      return;
-    }
-
-    // If RLS silently prevented the delete, 'data' will be empty
-    if (!data || data.length === 0) {
       setMessage({
-        text: "🚫 Delete not allowed for this user.",
+        text: "❌ Error deleting location: " + error.message,
         type: "error",
       });
       return;
     }
 
-    // Success path
-    setLocations((prev) => prev.filter((loc) => loc.id !== id));
-    setMessage({
-      text: "✅ Location deleted successfully!",
-      type: "success",
-    });
+    // Now verify whether the row is actually deleted
+    const { data: stillThere, error: checkError } = await supabase
+      .from("locations")
+      .select("id")
+      .eq("id", id);
+
+    if (checkError) {
+      console.error("❌ Error checking delete:", checkError.message);
+      setMessage({
+        text: "⚠️ Could not verify delete.",
+        type: "error",
+      });
+      return;
+    }
+
+    if (stillThere && stillThere.length > 0) {
+      // Row still exists → RLS blocked the delete silently
+      setMessage({
+        text: "🚫 Delete not allowed for this user.",
+        type: "error",
+      });
+    } else {
+      // Row is gone → success
+      setLocations((prev) => prev.filter((loc) => loc.id !== id));
+      setMessage({
+        text: "✅ Location deleted successfully!",
+        type: "success",
+      });
+    }
   };
 
   return (
