@@ -87,7 +87,7 @@ export default function ItemsPage() {
     const { error } = await supabase.from('items').delete().eq('id', id);
     if (error) {alert('Delete failed: ' + error.message);
       showMessage({
-        text: "❌ Error fetching locations: " + error.message,
+        text: "❌ This user cannot delete.",
         type: "error",
       });
      }
