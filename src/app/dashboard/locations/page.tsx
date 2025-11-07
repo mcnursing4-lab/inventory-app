@@ -71,49 +71,53 @@ export default function LocationsPage() {
   };
 
   const deleteLocation = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this location?")) return;
+  if (!confirm("Are you sure you want to delete this location?")) return;
 
-    const { error } = await supabase.from("locations").delete().eq("id", id);
+  const { error } = await supabase.from("locations").delete().eq("id", id);
 
-    if (error) {
-      console.error("❌ Error deleting location:", error.message);
-      setMessage({
-        text: "❌ Error deleting location: " + error.message,
-        type: "error",
-      });
-      return;
-    }
+  if (error) {
+    console.error("❌ Error deleting location:", error.message);
+    setMessage({
+      text: "❌ Error deleting location: " + error.message,
+      type: "error",
+    });
+    return;
+  }
 
-    // Now verify whether the row is actually deleted
-    const { data: stillThere, error: checkError } = await supabase
-      .from("locations")
-      .select("id")
-      .eq("id", id);
+  // Wait a moment to let RLS enforcement complete
+  await new Promise((resolve) => setTimeout(resolve, 700));
 
-    if (checkError) {
-      console.error("❌ Error checking delete:", checkError.message);
-      setMessage({
-        text: "⚠️ Could not verify delete.",
-        type: "error",
-      });
-      return;
-    }
+  // Now verify whether the row is actually deleted
+  const { data: stillThere, error: checkError } = await supabase
+    .from("locations")
+    .select("id")
+    .eq("id", id);
 
-    if (stillThere && stillThere.length > 0) {
-      // Row still exists → RLS blocked the delete silently
-      setMessage({
-        text: "🚫 Delete not allowed for this user.",
-        type: "error",
-      });
-    } else {
-      // Row is gone → success
-      setLocations((prev) => prev.filter((loc) => loc.id !== id));
-      setMessage({
-        text: "✅ Location deleted successfully!",
-        type: "success",
-      });
-    }
-  };
+  if (checkError) {
+    console.error("❌ Error checking delete:", checkError.message);
+    setMessage({
+      text: "⚠️ Could not verify delete.",
+      type: "error",
+    });
+    return;
+  }
+
+  if (stillThere && stillThere.length > 0) {
+    // Row still exists → RLS blocked the delete silently
+    setMessage({
+      text: "🚫 Delete not allowed for this user.",
+      type: "error",
+    });
+  } else {
+    // Row is gone → success
+    setLocations((prev) => prev.filter((loc) => loc.id !== id));
+    setMessage({
+      text: "✅ Location deleted successfully!",
+      type: "success",
+    });
+  }
+};
+
 
   return (
     <div className="p-6">
