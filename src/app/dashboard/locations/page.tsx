@@ -58,7 +58,7 @@ export default function LocationsPage() {
     if (error) {
       console.error("❌ Supabase insert error:", error.message);
       setMessage({
-        text: "❌ Error adding location: " + error.message,
+        text: "❌Add location not allowed for this user.",
         type: "error",
       });
     } else if (data && data.length > 0) {
