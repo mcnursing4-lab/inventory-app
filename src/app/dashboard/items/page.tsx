@@ -287,13 +287,13 @@ export default function ItemsPage() {
               <td className="p-2 border">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+                  className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-300"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="bg-blue-200 text-black px-4 py-1 rounded"
+                  className="bg-blue-200 text-black px-4 py-1 rounded hover:bg-blue-100"
                 >
                   X
                 </button>
