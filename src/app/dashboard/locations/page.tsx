@@ -168,7 +168,7 @@ export default function LocationsPage() {
               <span>{loc.name}</span>
               <button
                 onClick={() => deleteLocation(loc.id)}
-                className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                className="px-2 py-1 bg-blue-200 text-black rounded hover:bg-blue-100"
               >
                 X
               </button>
